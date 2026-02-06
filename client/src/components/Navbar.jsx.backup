@@ -1,0 +1,194 @@
+import React, { useState, useContext } from 'react';
+import { CartContext } from '../context/CartContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaShoppingCart, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaTimes, FaSearch, FaHeart } from 'react-icons/fa';
+import { WishlistContext } from '../context/WishlistContext';
+
+const Navbar = () => {
+    const navigate = useNavigate();
+    const { cartItems } = useContext(CartContext);
+    const { wishlistItems } = useContext(WishlistContext);
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchTimeout, setSearchTimeout] = useState(null);
+
+    const logoutHandler = () => {
+        localStorage.removeItem('userInfo');
+        navigate('/login');
+        window.location.reload();
+    };
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+
+        // Clear previous timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        // Set new timeout for debouncing (300ms)
+        const timeout = setTimeout(() => {
+            if (value.trim()) {
+                navigate(`/shop?search=${encodeURIComponent(value.trim())}`);
+            }
+        }, 300);
+
+        setSearchTimeout(timeout);
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
+    return (
+        <nav className="navbar">
+            <div className="container navbar-container">
+                <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img
+                        src="/logo.png"
+                        alt="CLOTHI Logo"
+                        style={{
+                            height: '45px',
+                            width: '45px',
+                            objectFit: 'contain',
+                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                        }}
+                    />
+                    CLOTHI.
+                </Link>
+
+                {/* Search Bar */}
+                <form onSubmit={handleSearchSubmit} style={{ flex: '1', maxWidth: '400px', margin: '0 2rem', display: window.innerWidth < 768 ? 'none' : 'block' }}>
+                    <div style={{ position: 'relative' }}>
+                        <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '14px' }} />
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            style={{
+                                width: '100%',
+                                padding: '8px 12px 8px 36px',
+                                border: '1px solid #e1e1e1',
+                                borderRadius: '20px',
+                                fontSize: '14px',
+                                outline: 'none',
+                                transition: 'border-color 0.3s'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#0984e3'}
+                            onBlur={(e) => e.target.style.borderColor = '#e1e1e1'}
+                        />
+                    </div>
+                    className="nav-link dropdown-toggle"
+                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        >
+                    Shop <FaChevronDown size={12} />
+                </button>
+                {showCategoryDropdown && (
+                    <div className="dropdown-menu">
+                        <Link
+                            to="/shop?category=Men"
+                            className="dropdown-item"
+                            onClick={() => { setShowCategoryDropdown(false); setMobileMenuOpen(false); }}
+                        >
+                            Men
+                        </Link>
+                        <Link
+                            to="/shop?category=Women"
+                            className="dropdown-item"
+                            onClick={() => { setShowCategoryDropdown(false); setMobileMenuOpen(false); }}
+                        >
+                            Women
+                        </Link>
+                        <Link
+                            to="/shop?category=Kids"
+                            className="dropdown-item"
+                            onClick={() => { setShowCategoryDropdown(false); setMobileMenuOpen(false); }}
+                        >
+                            Kids
+                        </Link>
+                        <Link
+                            to="/shop"
+                            className="dropdown-item"
+                            onClick={() => { setShowCategoryDropdown(false); setMobileMenuOpen(false); }}
+                        >
+                            All Products
+                        </Link>
+                    </div>
+                )}
+            </li>
+
+            {/* Auth Links */}
+            {!userInfo ? (
+                <>
+                    <li>
+                        <Link to="/login" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                    </li>
+                    <li>
+                        <Link to="/register" className="btn btn-primary" style={{ padding: '8px 16px' }} onClick={() => setMobileMenuOpen(false)}>
+                            Register
+                        </Link>
+                    </li>
+                </>
+            ) : (
+                <>
+                    <li>
+                        <Link to="/profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                            <FaUser /> {userInfo.name}
+                        </Link>
+                    </li>
+                    {userInfo.isAdmin && (
+                        <li>
+                            <Link to="/admin/dashboard" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                Admin
+                            </Link>
+                        </li>
+                    )}
+                    <li>
+                        <button onClick={() => { logoutHandler(); setMobileMenuOpen(false); }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>
+                            <FaSignOutAlt />
+                        </button>
+                    </li>
+                </>
+            )}
+
+            <li>
+                <Link to="/cart" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '5px' }} onClick={() => setMobileMenuOpen(false)}>
+                    <FaShoppingCart />
+                    <span>Cart</span>
+                    {cartItems.length > 0 && (
+                        <span style={{
+                            background: 'red',
+                            color: 'white',
+                            borderRadius: '50%',
+                            padding: '2px 6px',
+                            fontSize: '0.8rem'
+                        }}>
+                            {cartItems.reduce((acc, item) => acc + item.qty, 0)}
+                        </span>
+                    )}
+                </Link>
+            </li>
+        </ul>
+
+                {/* Mobile Menu Toggle */ }
+    <button
+        className="mobile-menu-toggle"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label="Toggle menu"
+    >
+        {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+    </button>
+            </div >
+        </nav >
+    );
+};
+
+export default Navbar;
