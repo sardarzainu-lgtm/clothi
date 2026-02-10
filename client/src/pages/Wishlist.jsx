@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { WishlistContext } from '../context/WishlistContext';
 import { CartContext } from '../context/CartContext';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Wishlist = () => {
     const { wishlistItems, removeFromWishlist } = useContext(WishlistContext);
@@ -55,9 +56,10 @@ const Wishlist = () => {
 
                         <Link to={`/product/${product._id}`}>
                             <img
-                                src={product.image}
+                                src={getImageUrl(product.image)}
                                 alt={product.name}
                                 style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+                                onError={(e) => { e.target.style.display = 'none'; }}
                             />
                         </Link>
                         <div style={{ padding: '1rem' }}>

@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useToast } from '../context/ToastContext';
 import ImageGallery from '../components/ImageGallery';
 import { SkeletonProductDetails } from '../components/SkeletonLoader';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -136,7 +137,7 @@ const ProductDetails = () => {
                 {/* Image Gallery */}
                 <div className="product-image-container">
                     <ImageGallery 
-                        images={[product.image, product.image, product.image]} 
+                        images={[getImageUrl(product.image), getImageUrl(product.image), getImageUrl(product.image)]} 
                         productName={product.name}
                     />
                 </div>
@@ -405,7 +406,7 @@ const ProductDetails = () => {
                                             background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
                                         }}>
                                             <img
-                                                src={product.image}
+                                                src={getImageUrl(product.image)}
                                                 alt={product.name}
                                                 style={{ 
                                                     position: 'absolute',
@@ -500,7 +501,7 @@ const ProductDetails = () => {
                                 style={{ textDecoration: 'none', color: 'inherit' }}
                             >
                                 <img
-                                    src={product.image}
+                                    src={getImageUrl(product.image)}
                                     alt={product.name}
                                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                                 />

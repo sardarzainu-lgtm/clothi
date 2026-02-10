@@ -9,6 +9,7 @@ import { SkeletonProductList } from '../components/SkeletonLoader';
 import TrustBadges from '../components/TrustBadges';
 import ProductCard from '../components/ProductCard';
 import heroImageDefault from '../assets/hero-image.jpg';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [heroImage, setHeroImage] = useState(heroImageDefault);
+  const [heroHeading, setHeroHeading] = useState('RAMZAN SALE');
+  const [heroDescription, setHeroDescription] = useState('Get up to **30% off** on new arrivals. Discover premium fashion that defines your style.');
   const { addToWishlist, removeFromWishlist, isInWishlist } = useContext(WishlistContext);
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
@@ -91,12 +94,20 @@ const Home = () => {
     const fetchSettings = async () => {
       try {
         const { data } = await axios.get('/api/settings');
-        if (data && data.heroImage) {
-          setHeroImage(data.heroImage);
+        if (data) {
+          if (data.heroImage) {
+            setHeroImage(data.heroImage);
+          }
+          if (data.heroHeading) {
+            setHeroHeading(data.heroHeading);
+          }
+          if (data.heroDescription) {
+            setHeroDescription(data.heroDescription);
+          }
         }
       } catch (error) {
-        console.warn('Error fetching settings, using default hero image:', error);
-        // Keep default image if settings fetch fails
+        console.warn('Error fetching settings, using default values:', error);
+        // Keep default values if settings fetch fails
       }
     };
     fetchSettings();
@@ -159,10 +170,16 @@ const Home = () => {
         <div className="hero-particles"></div>
         <div className="hero-content">
           <h1 className="hero-title">
-            RAMZAN SALE
+            {heroHeading}
           </h1>
           <p className="hero-subtitle">
-            Get up to <strong className="hero-highlight">30% off</strong> on new arrivals. Discover premium fashion that defines your style.
+            {heroDescription.split('**').map((part, index) => 
+              index % 2 === 1 ? (
+                <strong key={index} className="hero-highlight">{part}</strong>
+              ) : (
+                part
+              )
+            )}
           </p>
           <Link 
             to="/shop" 
@@ -432,8 +449,9 @@ const QuickViewModal = ({ product, onClose }) => {
         <div className="fashion-quickview-content">
           <div className="fashion-quickview-image">
             <img
-              src={product.image}
+              src={getImageUrl(product.image)}
               alt={product.name}
+              onError={(e) => { e.target.src = heroImageDefault; }}
             />
           </div>
 

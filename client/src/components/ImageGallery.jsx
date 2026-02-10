@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaChevronLeft, FaChevronRight, FaExpand } from 'react-icons/fa';
+import { getImageUrl, getImageErrorHandler } from '../utils/imageUtils';
 
 const ImageGallery = ({ images, productName }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const mainImage = images[selectedIndex] || images[0];
+  const mainImage = getImageUrl(images[selectedIndex] || images[0]);
   const thumbnails = images.slice(0, 5); // Show max 5 thumbnails
 
   const nextImage = () => {
@@ -90,6 +91,7 @@ const ImageGallery = ({ images, productName }) => {
           <img
             src={mainImage}
             alt={productName}
+            onError={getImageErrorHandler()}
             style={{
               width: '100%',
               height: '100%',
@@ -237,8 +239,9 @@ const ImageGallery = ({ images, productName }) => {
                 }}
               >
                 <img
-                  src={image}
+                  src={getImageUrl(image)}
                   alt={`${productName} thumbnail ${index + 1}`}
+                  onError={getImageErrorHandler()}
                   style={{
                     width: '100%',
                     height: '100%',
@@ -295,7 +298,7 @@ const ImageGallery = ({ images, productName }) => {
             onClick={closeLightbox}
             style={{
               position: 'absolute',
-              top: window.innerWidth < 768 ? '1.5rem' : '2.5rem',
+              top: window.innerWidth < 768 ? '7.5rem' : '3.5rem',
               right: window.innerWidth < 768 ? '1.5rem' : '2.5rem',
               background: 'rgba(255, 255, 255, 0.08)',
               backdropFilter: 'blur(12px)',
@@ -336,7 +339,7 @@ const ImageGallery = ({ images, productName }) => {
             <div
               style={{
                 position: 'absolute',
-                top: window.innerWidth < 768 ? '1.5rem' : '2.5rem',
+                top: window.innerWidth < 768 ? '7.5rem' : '3.5rem',
                 left: window.innerWidth < 768 ? '1.5rem' : '2.5rem',
                 background: 'rgba(255, 255, 255, 0.08)',
                 backdropFilter: 'blur(12px)',
@@ -391,8 +394,9 @@ const ImageGallery = ({ images, productName }) => {
               }}
             >
               <img
-                src={images[lightboxIndex]}
+                src={getImageUrl(images[lightboxIndex])}
                 alt={productName}
+                onError={getImageErrorHandler()}
                 style={{
                   maxWidth: '100%',
                   maxHeight: '100%',

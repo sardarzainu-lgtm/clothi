@@ -20,6 +20,25 @@ const Checkout = () => {
     const [phoneNumber, setPhoneNumber] = useState(shippingAddress.phoneNumber || '');
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(paymentMethod || 'EasyPaisa');
     const [transactionId, setTransactionId] = useState('');
+    const [customCities, setCustomCities] = useState([]);
+
+    // Comprehensive list of Pakistani cities (sorted alphabetically, no duplicates)
+    const pakistaniCities = [
+        'Abbottabad', 'Ahmadpur East', 'Attock', 'Bahawalpur', 'Bannu', 'Bhakkar', 'Bhalwal', 'Burewala',
+        'Chakdara', 'Chakwal', 'Chaman', 'Chiniot', 'Chishtian', 'Dadu', 'Daharki', 'Daska',
+        'Dera Ghazi Khan', 'Dera Ismail Khan', 'Faisalabad', 'Ghotki', 'Gojra', 'Gujranwala', 'Gujrat',
+        'Hafizabad', 'Hangu', 'Hasilpur', 'Hassan Abdal', 'Hyderabad', 'Islamabad', 'Jacobabad',
+        'Jaranwala', 'Jhang', 'Jhelum', 'Kamalia', 'Kamoke', 'Kandhkot', 'Karachi', 'Karak',
+        'Kasur', 'Kashmore', 'Khanewal', 'Khanpur', 'Khairpur', 'Kharian', 'Khuzdar', 'Kohat',
+        'Kot Addu', 'Kot Diji', 'Kotri', 'Lahore', 'Lakki Marwat', 'Larkana', 'Lodhran',
+        'Mandi Bahauddin', 'Mardan', 'Mian Channu', 'Mianwali', 'Mingaora', 'Mirpur Khas',
+        'Mirpur Mathelo', 'Mithi', 'Muzaffargarh', 'Muzaffarabad', 'Multan', 'Muridke',
+        'Narowal', 'Naushahro Feroze', 'Nawabshah', 'Nowshera', 'Okara', 'Pakpattan',
+        'Peshawar', 'Qambar Shahdadkot', 'Quetta', 'Rahim Yar Khan', 'Rawalpindi', 'Rohri',
+        'Sahiwal', 'Sanghar', 'Sargodha', 'Shahdadkot', 'Shahdadpur', 'Shahkot', 'Sheikhupura',
+        'Shikarpur', 'Sialkot', 'Sukkur', 'Swabi', 'Tando Adam', 'Tando Allahyar',
+        'Tando Muhammad Khan', 'Tank', 'Thatta', 'Tharparkar', 'Umerkot', 'Vihari', 'Zafarwal'
+    ];
 
     useEffect(() => {
         if (!userInfo) {
@@ -178,21 +197,31 @@ const Checkout = () => {
                         <div className="checkout-form-grid">
                             <div className="form-group">
                                 <label className="form-label">City</label>
-                                <select
-                                    className="form-control"
-                                    value={city}
-                                    onChange={(e) => setCity(e.target.value)}
-                                >
-                                    <option value="">--Select City--</option>
-                                    <option value="Karachi">Karachi</option>
-                                    <option value="Lahore">Lahore</option>
-                                    <option value="Islamabad">Islamabad</option>
-                                    <option value="Rawalpindi">Rawalpindi</option>
-                                    <option value="Faisalabad">Faisalabad</option>
-                                    <option value="Multan">Multan</option>
-                                    <option value="Peshawar">Peshawar</option>
-                                    <option value="Quetta">Quetta</option>
-                                </select>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        list="pakistani-cities"
+                                        placeholder="Select or enter city"
+                                        value={city}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setCity(value);
+                                            // If user enters a custom city that's not in the list, add it
+                                            if (value && !pakistaniCities.includes(value) && !customCities.includes(value)) {
+                                                setCustomCities([...customCities, value]);
+                                            }
+                                        }}
+                                    />
+                                    <datalist id="pakistani-cities">
+                                        {pakistaniCities.map((cityName, index) => (
+                                            <option key={index} value={cityName} />
+                                        ))}
+                                        {customCities.map((cityName, index) => (
+                                            <option key={`custom-${index}`} value={cityName} />
+                                        ))}
+                                    </datalist>
+                                </div>
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Zip/Postal Code</label>
@@ -298,10 +327,6 @@ const Checkout = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <span>Shipping</span>
                             <span>Rs {shippingPrice}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                            <span>Tax</span>
-                            <span>Rs {taxPrice}</span>
                         </div>
                         <div style={{ borderTop: '1px solid #eee', margin: '1rem 0' }}></div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem' }}>

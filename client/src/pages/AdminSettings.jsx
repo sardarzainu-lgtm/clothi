@@ -5,6 +5,10 @@ import { useToast } from '../context/ToastContext';
 
 const AdminSettings = () => {
     const [heroImage, setHeroImage] = useState('');
+    const [heroHeading, setHeroHeading] = useState('RAMZAN SALE');
+    const [heroDescription, setHeroDescription] = useState('Get up to **30% off** on new arrivals. Discover premium fashion that defines your style.');
+    const [topBannerText, setTopBannerText] = useState('WINTER SALE: UP TO 30%-50% OFF');
+    const [topBannerEnabled, setTopBannerEnabled] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
@@ -14,6 +18,10 @@ const AdminSettings = () => {
             try {
                 const { data } = await axios.get('/api/settings');
                 setHeroImage(data.heroImage || '');
+                setHeroHeading(data.heroHeading || 'RAMZAN SALE');
+                setHeroDescription(data.heroDescription || 'Get up to **30% off** on new arrivals. Discover premium fashion that defines your style.');
+                setTopBannerText(data.topBannerText || 'WINTER SALE: UP TO 30%-50% OFF');
+                setTopBannerEnabled(data.topBannerEnabled !== undefined ? data.topBannerEnabled : true);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching settings:', error);
@@ -42,7 +50,9 @@ const AdminSettings = () => {
             };
 
             const { data } = await axios.post('/api/upload', formData, config);
-            setHeroImage(data);
+            // Handle both old format (string) and new format (object with imageUrl)
+            const imageUrl = typeof data === 'string' ? data : (data.imageUrl || data);
+            setHeroImage(imageUrl);
             setUploading(false);
             showToast('Image uploaded successfully!', 'success');
         } catch (error) {
@@ -65,7 +75,7 @@ const AdminSettings = () => {
 
             await axios.put(
                 '/api/settings',
-                { heroImage },
+                { heroImage, heroHeading, heroDescription, topBannerText, topBannerEnabled },
                 config
             );
             showToast('Settings updated successfully!', 'success');
@@ -92,10 +102,41 @@ const AdminSettings = () => {
             <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', marginBottom: '1.5rem' }}>Site Settings</h1>
 
             <div className="card" style={{ padding: '2rem' }}>
-                <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Homepage Hero Image</h2>
+                <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Homepage Hero Section</h2>
                 
                 <form onSubmit={submitHandler}>
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label">Hero Heading</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={heroHeading}
+                            onChange={(e) => setHeroHeading(e.target.value)}
+                            placeholder="Enter hero heading (e.g., RAMZAN SALE)"
+                            maxLength={100}
+                        />
+                        <small style={{ color: '#666', fontSize: '0.875rem' }}>
+                            Main heading displayed on the hero section
+                        </small>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label">Hero Description</label>
+                        <textarea
+                            className="form-control"
+                            value={heroDescription}
+                            onChange={(e) => setHeroDescription(e.target.value)}
+                            placeholder="Enter hero description"
+                            rows={4}
+                            maxLength={300}
+                            style={{ resize: 'vertical' }}
+                        />
+                        <small style={{ color: '#666', fontSize: '0.875rem' }}>
+                            Description text. Use <strong>**text**</strong> to make text bold (e.g., **30% off**)
+                        </small>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                         <label className="form-label">Hero Image URL</label>
                         <input
                             type="text"
@@ -141,6 +182,41 @@ const AdminSettings = () => {
                             </div>
                         </div>
                     )}
+
+                    <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+
+                    <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Top Banner Settings</h2>
+
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <input
+                                type="checkbox"
+                                checked={topBannerEnabled}
+                                onChange={(e) => setTopBannerEnabled(e.target.checked)}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            Enable Top Banner
+                        </label>
+                        <small style={{ color: '#666', fontSize: '0.875rem', display: 'block', marginTop: '0.25rem' }}>
+                            Show or hide the promotional banner at the top of the website
+                        </small>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label">Banner Text</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={topBannerText}
+                            onChange={(e) => setTopBannerText(e.target.value)}
+                            placeholder="Enter banner text (e.g., WINTER SALE: UP TO 30%-50% OFF)"
+                            maxLength={100}
+                            disabled={!topBannerEnabled}
+                        />
+                        <small style={{ color: '#666', fontSize: '0.875rem' }}>
+                            Promotional text displayed in the top banner
+                        </small>
+                    </div>
 
                     <button type="submit" className="btn btn-primary btn-block">
                         Save Settings

@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { FaHeart, FaRegHeart, FaEye, FaShoppingCart } from 'react-icons/fa';
+import { getImageUrl, getImageErrorHandler } from '../utils/imageUtils';
 
 /**
  * Premium ProductCard Component
@@ -61,12 +62,13 @@ const ProductCard = memo(({
           aria-label={`View details for ${product.name}`}
         >
           <img
-            src={product.image}
+            src={getImageUrl(product.image)}
             alt={product.name}
             className="fashion-product-image"
             loading="lazy"
             decoding="async"
             fetchpriority="low"
+            onError={getImageErrorHandler()}
           />
           
           {/* Product Badges */}

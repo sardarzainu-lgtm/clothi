@@ -8,6 +8,8 @@ import { useToast } from '../context/ToastContext';
 import { SkeletonProductList } from '../components/SkeletonLoader';
 import EmptyState from '../components/EmptyState';
 import ProductCard from '../components/ProductCard';
+import { getImageUrl } from '../utils/imageUtils';
+import heroImageDefault from '../assets/hero-image.jpg';
 
 // Custom Dual Range Slider Component
 const CustomDualRangeSlider = ({ min, max, values, onChange }) => {
@@ -405,7 +407,7 @@ const Shop = () => {
                 </div>
             </div> */}
 
-            <div className="fashion-shop-layout" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--spacing-lg)' }}>
+            <div className="fashion-shop-layout" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--spacing-sm)' }}>
                 {/* Filter Bar - All Filters Inline */}
                 <div className="filter-bar" style={{ gridColumn: '1 / -1' }}>
                     {/* Category Filter Chips - Top Center */}
@@ -639,8 +641,9 @@ const QuickViewModal = ({ product, onClose }) => {
                 <div className="fashion-quickview-content">
                     <div className="fashion-quickview-image">
                         <img
-                            src={product.image}
+                            src={getImageUrl(product.image)}
                             alt={product.name}
+                            onError={(e) => { e.target.src = heroImageDefault; }}
                         />
                     </div>
 

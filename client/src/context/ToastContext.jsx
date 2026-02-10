@@ -37,7 +37,6 @@ export const ToastProvider = ({ children }) => {
                 className="toast-container"
                 style={{
                     position: 'fixed',
-                    top: '140px', // Below top banner (40px) + navbar (80px) + spacing (20px)
                     right: '20px',
                     zIndex: 10001, // Above navbar (9999) and top banner (10000)
                     display: 'flex',

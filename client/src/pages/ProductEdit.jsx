@@ -43,22 +43,30 @@ const ProductEdit = () => {
 
     const uploadFileHandler = async (e) => {
         const file = e.target.files[0];
+        if (!file) return;
+        
         const formData = new FormData();
         formData.append('image', file);
         setUploading(true);
 
         try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo?.token}`,
                 },
             };
 
             const { data } = await axios.post('/api/upload', formData, config);
-            setImage(data);
+            // Handle both old format (string) and new format (object with imageUrl)
+            const imageUrl = typeof data === 'string' ? data : (data.imageUrl || data);
+            setImage(imageUrl);
             setUploading(false);
+            showToast('Image uploaded successfully!', 'success');
         } catch (error) {
-            showToast('Error uploading image:', error);
+            const errorMessage = error.response?.data?.message || error.message || 'Error uploading image';
+            showToast(errorMessage, 'error');
             setUploading(false);
         }
     };

@@ -78,38 +78,43 @@ const Navbar = () => {
     return (
         <nav className="navbar" ref={navbarRef}>
             <div className="container navbar-container">
-                <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <img
-                        src="/logo.png"
-                        alt="CLOTHI Logo"
-                        style={{
-                            height: '45px',
-                            width: '45px',
-                            objectFit: 'contain',
-                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-                        }}
-                    />
-                    CLOTHI.
-                </Link>
-
-                {/* Search Bar */}
-                <div className="premium-search-container">
-                    <form onSubmit={handleSearchSubmit} className="premium-search-form">
-                        <div className="premium-search-wrapper">
-                            <FaSearch className="premium-search-icon" />
-                            <input
-                                type="text"
-                                placeholder="Search products, brands, categories..."
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                className="premium-search-input"
-                                aria-label="Search products"
-                            />
-                        </div>
-                    </form>
+                {/* Logo Section - Top Center */}
+                <div className="navbar-logo-section">
+                    <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+                        <img
+                            src="/logo.png"
+                            alt="MAKHMAL JAN Logo"
+                            style={{
+                                height: '45px',
+                                width: '45px',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                            }}
+                        />
+                        MAKHMAL JAN
+                    </Link>
                 </div>
 
-                <ul className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`}>
+                {/* Navigation Section - Below Logo */}
+                <div className="navbar-nav-section">
+                    {/* Search Bar */}
+                    <div className="premium-search-container">
+                        <form onSubmit={handleSearchSubmit} className="premium-search-form">
+                            <div className="premium-search-wrapper">
+                                <FaSearch className="premium-search-icon" />
+                                <input
+                                    type="text"
+                                    placeholder="Search products, brands, categories..."
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    className="premium-search-input"
+                                    aria-label="Search products"
+                                />
+                            </div>
+                        </form>
+                    </div>
+
+                    <ul className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`}>
                     <li>
                         <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
                     </li>
@@ -234,18 +239,18 @@ const Navbar = () => {
                         </Link>
                     </li>
 
-                    <li>
+                    {/* Cart Link - Desktop Only */}
+                    <li className="desktop-cart-link">
                         <Link to="/cart" className="nav-link cart-badge" style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} onClick={() => setMobileMenuOpen(false)}>
                             <FaShoppingCart style={{ fontSize: '18px' }} />
-                            <span style={{ display: window.innerWidth < 768 ? 'none' : 'inline' }}>Cart</span>
+                            <span>Cart</span>
                             {cartItems.length > 0 && (
                                 <span 
                                     className="cart-badge-pulse"
                                     style={{
                                         position: 'absolute',
                                         top: '-8px',
-                                        right: window.innerWidth < 768 ? '-8px' : 'auto',
-                                        left: window.innerWidth < 768 ? 'auto' : 'calc(100% - 8px)',
+                                        left: 'calc(100% - 8px)',
                                         background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                         color: 'white',
                                         borderRadius: '50%',
@@ -265,16 +270,60 @@ const Navbar = () => {
                             )}
                         </Link>
                     </li>
-                </ul>
+                    </ul>
 
-                {/* Mobile Menu Toggle */}
-                <button
-                    className="mobile-menu-toggle"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Toggle menu"
-                >
-                    {mobileMenuOpen ? <FaTimes /> : <FaBars />}
-                </button>
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        className="mobile-menu-toggle"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label="Toggle menu"
+                    >
+                        {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+                    </button>
+
+                    {/* Mobile Icons - Search and Cart */}
+                    <div className="mobile-nav-icons">
+                        <button
+                            className="mobile-search-icon"
+                            onClick={() => setSearchModalOpen(true)}
+                            aria-label="Search"
+                        >
+                            <FaSearch />
+                        </button>
+                        <Link 
+                            to="/cart" 
+                            className="mobile-cart-icon" 
+                            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                        >
+                            <FaShoppingCart />
+                            {cartItems.length > 0 && (
+                                <span 
+                                    className="cart-badge-pulse"
+                                    style={{
+                                        position: 'absolute',
+                                        top: '-8px',
+                                        right: '-8px',
+                                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                        color: 'white',
+                                        borderRadius: '50%',
+                                        width: '20px',
+                                        height: '20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '0.7rem',
+                                        fontWeight: '700',
+                                        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)',
+                                        border: '2px solid white',
+                                        pointerEvents: 'none'
+                                    }}
+                                >
+                                    {cartItems.reduce((acc, item) => acc + item.qty, 0)}
+                                </span>
+                            )}
+                        </Link>
+                    </div>
+                </div>
             </div>
 
             {/* Search Modal */}

@@ -37,21 +37,49 @@ const LoadingProgress = () => {
         top: 0,
         left: 0,
         right: 0,
-        height: '3px',
-        background: 'rgba(99, 102, 241, 0.1)',
+        height: '4px',
+        background: 'rgba(210, 168, 65, 0.15)',
         zIndex: 10001,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backdropFilter: 'blur(10px)'
       }}
     >
       <div
         style={{
           height: '100%',
-          background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)',
+          background: 'linear-gradient(90deg, #d2a841 0%, #deb94f 25%, #f4de85 50%, #deb94f 75%, #d2a841 100%)',
+          backgroundSize: '200% 100%',
           width: `${progress}%`,
-          transition: 'width 0.3s ease',
-          boxShadow: '0 0 10px rgba(99, 102, 241, 0.5)'
+          transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          boxShadow: '0 0 20px rgba(210, 168, 65, 0.6), 0 0 40px rgba(244, 222, 133, 0.4)',
+          position: 'relative',
+          animation: 'shimmer 2s ease-in-out infinite',
+          marginBottom: '-32px'
         }}
-      />
+      >
+        {/* Shimmer effect overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+            animation: 'shimmer-slide 1.5s ease-in-out infinite'
+          }}
+        />
+      </div>
+      <style>{`
+        @keyframes shimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @keyframes shimmer-slide {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 };
