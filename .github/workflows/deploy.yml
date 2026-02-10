@@ -1,38 +1,33 @@
-name: Build & Deploy React Client to GitHub Pages
+name: Build and Deploy React + Vite
 
 on:
   push:
     branches:
-      - main   # your default branch
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # 3. Install dependencies in client folder
-      - name: Install client dependencies
+      - name: Install dependencies
         run: |
           cd client
-          npm ci
+          npm install
 
-      # 4. Build the React app
-      - name: Build client
+      - name: Build Vite project
         run: |
           cd client
           npm run build
 
-      # 5. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
