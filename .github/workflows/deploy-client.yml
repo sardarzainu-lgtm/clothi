@@ -1,10 +1,9 @@
-
 name: Build and Deploy React + Vite
 
 on:
   push:
     branches:
-      - main  # change to your default branch if needed
+      - main
 
 jobs:
   build-and-deploy:
