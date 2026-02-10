@@ -1,16 +1,17 @@
+
 name: Build and Deploy React + Vite
 
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main  # change to your default branch if needed
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
