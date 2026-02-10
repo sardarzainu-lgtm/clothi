@@ -3,31 +3,34 @@ name: Build and Deploy Client
 on:
   push:
     branches:
-      - main
+      - main   # replace with your branch if different
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Use Node.js 20
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 20  # match your Node version
 
+      # 3️⃣ Install dependencies in client folder
       - name: Install dependencies
-        run: |
-          cd client
-          npm install
+        working-directory: client
+        run: npm install
 
+      # 4️⃣ Build Vite project
       - name: Build client
-        run: |
-          cd client
-          npm run build
+        working-directory: client
+        run: npx vite build
 
+      # 5️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
