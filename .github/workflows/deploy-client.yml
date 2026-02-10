@@ -3,7 +3,7 @@ name: Build and Deploy React + Vite
 on:
   push:
     branches:
-      - main  # your default branch
+      - main  # or your default branch
 
 jobs:
   build-and-deploy:
@@ -26,7 +26,7 @@ jobs:
       - name: Build Vite project
         run: |
           cd client
-          npx vite build   # <-- use npx here
+          npx vite build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
