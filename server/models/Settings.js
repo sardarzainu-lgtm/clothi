@@ -5,6 +5,22 @@ const settingsSchema = new mongoose.Schema({
         type: String,
         default: '/uploads/default-hero.jpg', // Default hero image path
     },
+    heroHeading: {
+        type: String,
+        default: 'RAMZAN SALE',
+    },
+    heroDescription: {
+        type: String,
+        default: 'Get up to **30% off** on new arrivals. Discover premium fashion that defines your style.',
+    },
+    topBannerText: {
+        type: String,
+        default: 'WINTER SALE: UP TO 30%-50% OFF',
+    },
+    topBannerEnabled: {
+        type: Boolean,
+        default: true,
+    },
 }, {
     timestamps: true,
 });

@@ -3,6 +3,7 @@ const router = express.Router();
 const asyncHandler = require('express-async-handler');
 const DailyDeal = require('../models/DailyDeal.js');
 const { protect, admin } = require('../middleware/authMiddleware.js');
+const { auditLog } = require('../middleware/auditMiddleware.js');
 
 // @desc    Get active daily deals
 // @route   GET /api/dailydeals
@@ -30,7 +31,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 // @desc    Create daily deal
 // @route   POST /api/dailydeals
 // @access  Private/Admin
-router.post('/', protect, admin, asyncHandler(async (req, res) => {
+router.post('/', protect, admin, auditLog('DAILY_DEAL_CREATE', 'DailyDeal'), asyncHandler(async (req, res) => {
     const { product, endTime, discountPercentage } = req.body;
 
     // Validate required fields
@@ -75,7 +76,7 @@ router.post('/', protect, admin, asyncHandler(async (req, res) => {
 // @desc    Update daily deal
 // @route   PUT /api/dailydeals/:id
 // @access  Private/Admin
-router.put('/:id', protect, admin, asyncHandler(async (req, res) => {
+router.put('/:id', protect, admin, auditLog('DAILY_DEAL_UPDATE', 'DailyDeal'), asyncHandler(async (req, res) => {
     const { product, endTime, discountPercentage, isActive } = req.body;
 
     const deal = await DailyDeal.findById(req.params.id);
@@ -98,7 +99,7 @@ router.put('/:id', protect, admin, asyncHandler(async (req, res) => {
 // @desc    Delete daily deal
 // @route   DELETE /api/dailydeals/:id
 // @access  Private/Admin
-router.delete('/:id', protect, admin, asyncHandler(async (req, res) => {
+router.delete('/:id', protect, admin, auditLog('DAILY_DEAL_DELETE', 'DailyDeal'), asyncHandler(async (req, res) => {
     const deal = await DailyDeal.findById(req.params.id);
 
     if (deal) {
