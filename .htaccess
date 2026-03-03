@@ -1,0 +1,11 @@
+# SPA fallback: serve index.html for all routes so React Router can handle them.
+# Fixes "page not found" on reload and direct links (navbar, footer, shared URLs).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # Don't rewrite requests for existing files or directories
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
