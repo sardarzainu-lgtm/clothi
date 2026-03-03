@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaSearch } from 'react-icons/fa';
 import axios from 'axios';
 import { WishlistContext } from '../context/WishlistContext';
 import { CartContext } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { SkeletonProductList } from '../components/SkeletonLoader';
-import EmptyState from '../components/EmptyState';
 import ProductCard from '../components/ProductCard';
 import { getImageUrl } from '../utils/imageUtils';
 import heroImageDefault from '../assets/hero-image.jpg';
@@ -93,13 +92,13 @@ const CustomDualRangeSlider = ({ min, max, values, onChange }) => {
                     className="filter-range-label filter-range-label-min" 
                     style={{ left: `${leftPercent}%` }}
                 >
-                    ${values[0]}
+                    Rs {values[0]}
                 </span>
                 <span 
-                    className="filter-range-label filter-range-label-max" 
-                    style={{ left: `${rightPercent}%` }}
+                    className={`filter-range-label filter-range-label-max ${rightPercent >= 99.5 ? 'filter-range-label-at-max' : ''}`}
+                    style={rightPercent >= 99.5 ? { right: 0, left: 'auto' } : { left: `${rightPercent}%` }}
                 >
-                    ${values[1]}
+                    Rs {values[1]}
                 </span>
             </div>
         </div>
@@ -180,6 +179,18 @@ const Shop = () => {
             document.body.style.paddingRight = '';
         };
     }, [quickViewProduct]);
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (priceFilterRef.current && !priceFilterRef.current.contains(e.target)) setPriceFilterOpen(false);
+            if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target)) setSortDropdownOpen(false);
+            if (ratingDropdownRef.current && !ratingDropdownRef.current.contains(e.target)) setRatingDropdownOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const location = useLocation();
     const navigate = useNavigate();
     const { wishlistItems, addToWishlist, removeFromWishlist, isInWishlist } = React.useContext(WishlistContext);
@@ -193,6 +204,12 @@ const Shop = () => {
     const [sortBy, setSortBy] = useState('default');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedBrands, setSelectedBrands] = useState([]);
+    const [priceFilterOpen, setPriceFilterOpen] = useState(false);
+    const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+    const [ratingDropdownOpen, setRatingDropdownOpen] = useState(false);
+    const priceFilterRef = useRef(null);
+    const sortDropdownRef = useRef(null);
+    const ratingDropdownRef = useRef(null);
 
     const applyFiltersAndSort = React.useCallback((productsList) => {
         if (!productsList || productsList.length === 0) {
@@ -398,201 +415,339 @@ const Shop = () => {
     };
 
     return (
-        <div className="fashion-shop-container">
-            {/* Page Header */}
-            {/* Page Header - Removed */}
-            {/* <div className="fashion-page-header">
-                <div className="container" style={{ maxWidth: '1320px', margin: '0 auto' }}>
-                    <h1 className="fashion-page-title">{getPageTitle()}</h1>
-                </div>
-            </div> */}
-
-            <div className="fashion-shop-layout" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--spacing-sm)' }}>
-                {/* Filter Bar - All Filters Inline */}
-                <div className="filter-bar" style={{ gridColumn: '1 / -1' }}>
-                    {/* Category Filter Chips - Top Center */}
-                    <div className="filter-category-chips-top">
-                        <Link 
-                            to="/shop" 
-                            className={`fashion-category-chip ${!selectedCategory && !category ? 'fashion-chip-active' : ''}`}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setSelectedCategory('');
-                                navigate('/shop');
-                            }}
+        <div className="bg-background-dark font-display text-slate-100 min-h-screen">
+            {/* Category Sub-Nav (shop_page design) */}
+            <nav className="bg-background-dark border-b border-primary/10 pt-10 lg:pt-4">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-center gap-8 md:gap-12">
+                        <Link
+                            to="/shop"
+                            className={`py-4 text-xs font-bold tracking-widest uppercase border-b-2 transition-all ${
+                                !category && !selectedCategory ? 'text-primary border-primary' : 'text-slate-500 border-transparent hover:text-primary hover:border-primary'
+                            }`}
+                            onClick={() => setSelectedCategory('')}
                         >
                             All
                         </Link>
-                        {categories.map(cat => (
+                        {categories.map((cat) => (
                             <Link
                                 key={cat}
                                 to={`/shop?category=${cat}`}
-                                className={`fashion-category-chip ${(selectedCategory === cat || category === cat) ? 'fashion-chip-active' : ''}`}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setSelectedCategory(cat);
-                                    navigate(`/shop?category=${cat}`);
-                                }}
+                                className={`py-4 text-xs font-bold tracking-widest uppercase border-b-2 transition-all ${
+                                    selectedCategory === cat || category === cat ? 'text-primary border-primary' : 'text-slate-500 border-transparent hover:text-primary hover:border-primary'
+                                }`}
+                                onClick={() => { setSelectedCategory(cat); navigate(`/shop?category=${cat}`); }}
                             >
                                 {cat}
                             </Link>
                         ))}
                     </div>
-                    {/* Filter Items Container */}
-                    <div className="filter-bar-items-container">
-                    {/* Price Range Filter */}
-                    <div className="filter-bar-item filter-price-container">
-                        <label className="filter-price-heading">Price:</label>
-                        <div className="filter-range-container">
-                            <CustomDualRangeSlider
-                                min={0}
-                                max={10000}
-                                values={priceRange}
-                                onChange={setPriceRange}
-                            />
+                </div>
+            </nav>
+
+            {/* Filter & Sort Section (shop_page design) */}
+            <section className="py-6 border-b border-primary/10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex flex-wrap items-center gap-3">
+                            {/* Sort by – custom dropdown to match design */}
+                            <div className="relative" ref={sortDropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => { setSortDropdownOpen((o) => !o); setRatingDropdownOpen(false); }}
+                                    className={`flex items-center justify-between gap-2 px-4 py-2.5 min-w-[160px] rounded-lg border text-sm font-medium transition-colors ${
+                                        sortDropdownOpen ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-primary/5 border-primary/20 text-slate-100 hover:bg-primary/10'
+                                    }`}
+                                    aria-expanded={sortDropdownOpen}
+                                    aria-haspopup="listbox"
+                                    aria-label="Sort products"
+                                >
+                                    <span>
+                                        {sortBy === 'default' && 'Sort by'}
+                                        {sortBy === 'price-low' && 'Price: Low to High'}
+                                        {sortBy === 'price-high' && 'Price: High to Low'}
+                                        {sortBy === 'rating' && 'Highest Rated'}
+                                        {sortBy === 'newest' && 'Newest First'}
+                                    </span>
+                                    <span className="text-slate-500 flex flex-col leading-none text-[14px]">▾</span>
+                                </button>
+                                {sortDropdownOpen && (
+                                    <ul
+                                        className="shop-filter-dropdown absolute top-full left-0 mt-1 z-50 min-w-[200px] py-1 rounded-lg border border-slate-200 bg-white shadow-xl"
+                                        role="listbox"
+                                    >
+                                        {[
+                                            { value: 'default', label: 'Sort by' },
+                                            { value: 'price-low', label: 'Price: Low to High' },
+                                            { value: 'price-high', label: 'Price: High to Low' },
+                                            { value: 'rating', label: 'Highest Rated' },
+                                            { value: 'newest', label: 'Newest First' },
+                                        ].map((opt) => (
+                                            <li key={opt.value} role="option" aria-selected={sortBy === opt.value}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setSortBy(opt.value); setSortDropdownOpen(false); }}
+                                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                                                        sortBy === opt.value
+                                                            ? 'bg-primary text-white'
+                                                            : 'text-slate-600 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-primary/20 bg-primary/5 text-sm font-medium text-slate-100 hover:bg-primary/10 transition-colors">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={inStockOnly}
+                                        onChange={(e) => setInStockOnly(e.target.checked)}
+                                        className="rounded border-primary/30 bg-background-dark text-primary focus:ring-primary"
+                                        aria-label="In stock only"
+                                    />
+                                    In Stock
+                                </label>
+                            </div>
+                            {/* Rating – custom dropdown to match design */}
+                            <div className="relative" ref={ratingDropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => { setRatingDropdownOpen((o) => !o); setSortDropdownOpen(false); }}
+                                    className={`flex items-center justify-between gap-2 px-4 py-2.5 min-w-[120px] rounded-lg border text-sm font-medium transition-colors ${
+                                        ratingDropdownOpen ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-primary/5 border-primary/20 text-slate-100 hover:bg-primary/10'
+                                    }`}
+                                    aria-expanded={ratingDropdownOpen}
+                                    aria-haspopup="listbox"
+                                    aria-label="Minimum rating"
+                                >
+                                    <span>{minRating === 0 ? 'Rating' : `⭐ ${minRating}+`}</span>
+                                    <span className="text-slate-500 flex flex-col leading-none text-[14px]">▾</span>
+                                </button>
+                                {ratingDropdownOpen && (
+                                    <ul
+                                        className="shop-filter-dropdown absolute top-full left-0 mt-1 z-50 min-w-[160px] py-1 rounded-lg border border-slate-200 bg-white shadow-xl"
+                                        role="listbox"
+                                    >
+                                        {[
+                                            { value: 0, label: 'Rating' },
+                                            { value: 1, label: '⭐ 1+' },
+                                            { value: 2, label: '⭐ 2+' },
+                                            { value: 3, label: '⭐ 3+' },
+                                            { value: 4, label: '⭐ 4+' },
+                                            { value: 5, label: '⭐ 5' },
+                                        ].map((opt) => (
+                                            <li key={opt.value} role="option" aria-selected={minRating === opt.value}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setMinRating(opt.value); setRatingDropdownOpen(false); }}
+                                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                                                        minRating === opt.value
+                                                            ? 'bg-primary text-white'
+                                                            : 'text-slate-600 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            {/* Price button – opens dropdown with range slider (full width on mobile) */}
+                            <div className="relative w-full min-w-full sm:min-w-0 sm:w-auto" ref={priceFilterRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setPriceFilterOpen((open) => !open)}
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border w-full sm:w-auto justify-between ${
+                                        priceFilterOpen || priceRange[0] > 0 || priceRange[1] < 10000
+                                            ? 'bg-primary/10 border-primary/30 text-primary'
+                                            : 'bg-primary/5 border-primary/20 text-slate-100 hover:bg-primary/10'
+                                    }`}
+                                    aria-expanded={priceFilterOpen}
+                                    aria-haspopup="true"
+                                    aria-label="Filter by price"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        Price
+                                        {(priceRange[0] > 0 || priceRange[1] < 10000) && (
+                                            <span className="text-[10px] text-primary">Rs {priceRange[0]}–{priceRange[1]}</span>
+                                        )}
+                                    </span>
+                                    <span className="text-slate-400">▾</span>
+                                </button>
+                                {priceFilterOpen && (
+                                    <div className="shop-price-dropdown absolute top-full left-0 mt-1 z-50 w-full sm:min-w-[300px] sm:w-auto p-4 sm:p-5 bg-[#0a0a0a] border border-primary/30 rounded-xl shadow-2xl shadow-black/40 shop-price-dropdown-mobile">
+                                        <p className="text-sm text-slate-300 mb-4 font-medium">Price: Rs {priceRange[0]} – Rs {priceRange[1]}</p>
+                                        <div className="w-full shop-price-slider">
+                                            <CustomDualRangeSlider min={0} max={10000} values={priceRange} onChange={setPriceRange} />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setPriceRange([0, 10000]); setPriceFilterOpen(false); }}
+                                            className="mt-4 py-3 w-full sm:w-auto text-center text-xs font-semibold text-primary uppercase tracking-widest hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/5"
+                                        >
+                                            Reset price
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            {(priceRange[0] > 0 || priceRange[1] < 10000) && (
+                                <button
+                                    type="button"
+                                    onClick={resetFilters}
+                                    className="px-4 py-2 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
                         </div>
-                    </div>
-
-                    {/* Rating Filter */}
-                    <div className="filter-bar-item">
-                        <label htmlFor="rating-select" className="filter-inline-label">Rating:</label>
-                        <select
-                            id="rating-select"
-                            value={minRating}
-                            onChange={(e) => setMinRating(Number(e.target.value))}
-                            className="fashion-select-inline"
-                            aria-label="Minimum rating"
-                        >
-                            <option value="0">All Ratings</option>
-                            <option value="1">⭐ 1 & up</option>
-                            <option value="2">⭐⭐ 2 & up</option>
-                            <option value="3">⭐⭐⭐ 3 & up</option>
-                            <option value="4">⭐⭐⭐⭐ 4 & up</option>
-                            <option value="5">⭐⭐⭐⭐⭐ 5 only</option>
-                        </select>
-                    </div>
-
-                    {/* Availability Filter */}
-                    <div className="filter-bar-item">
-                        <label className="filter-checkbox-inline">
-                            <input
-                                type="checkbox"
-                                checked={inStockOnly}
-                                onChange={(e) => setInStockOnly(e.target.checked)}
-                                className="fashion-checkbox"
-                                aria-label="Show only in stock items"
-                            />
-                            <span>In Stock</span>
-                        </label>
-                    </div>
-
-                    {/* Sort Controls */}
-                    <div className="filter-controls">
-                        <label htmlFor="sort-select" className="filter-label">Sort:</label>
-                        <select
-                            id="sort-select"
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="fashion-select"
-                            aria-label="Sort products"
-                        >
-                            <option value="default">Featured</option>
-                            <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
-                            <option value="rating">Highest Rated</option>
-                            <option value="newest">Newest First</option>
-                        </select>
-
-                        <span className="fashion-product-count" aria-live="polite">
-                            {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
-                        </span>
-                    </div>
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest" aria-live="polite">
+                            Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'}
+                        </p>
                     </div>
                 </div>
+            </section>
 
-                {/* Clear search button */}
+            {/* Products Grid */}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" role="main" aria-label="Product listing">
                 {search && (
-                    <div className="fashion-clear-search">
-                        <Link to="/shop" className="fashion-clear-link">
-                            Clear Search
-                        </Link>
+                    <div className="mb-4">
+                        <Link to="/shop" className="text-primary hover:underline text-sm">Clear search &quot;{search}&quot;</Link>
                     </div>
                 )}
-
-                {/* Products Grid */}
-                <main className="fashion-products-main" role="main" aria-label="Product listing" style={{ width: '100%', minWidth: 0 }}>
-                    {loading ? (
-                        <SkeletonProductList count={12} />
-                    ) : filteredProducts.length === 0 ? (
-                        <EmptyState
-                            type="search"
-                            title="No products found"
-                            message="Try adjusting your filters or browse all products"
-                            actionLabel="Reset Filters"
-                            actionLink="/shop"
-                        />
-                    ) : (
-                        <>
-                            <div className="fashion-product-grid" style={{ width: '100%', maxWidth: '100%' }}>
-                                {paginatedProducts.map((product) => (
-                                    <ProductCard
-                                        key={product._id}
-                                        product={product}
-                                        onQuickView={handleQuickView}
-                                        onAddToWishlist={handleAddToWishlist}
-                                        onAddToCart={handleAddToCart}
-                                        isInWishlist={isInWishlist(product._id)}
-                                        showQuickActions={true}
-                                    />
-                                ))}
-                            </div>
-                            
-                            {/* Pagination Controls */}
-                            {totalPages > 1 && (
-                                <div style={{ 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center', 
-                                    gap: '1rem',
-                                    marginTop: '2rem',
-                                    marginBottom: '2rem'
-                                }}>
-                                    <button
-                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                        disabled={currentPage === 1}
-                                        className="btn btn-outline"
-                                        style={{ 
-                                            opacity: currentPage === 1 ? 0.5 : 1,
-                                            cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
-                                        }}
-                                    >
-                                        Previous
-                                    </button>
-                                    <span style={{ 
-                                        color: '#666',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        Page {currentPage} of {totalPages} ({filteredProducts.length} items)
-                                    </span>
-                                    <button
-                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="btn btn-outline"
-                                        style={{ 
-                                            opacity: currentPage === totalPages ? 0.5 : 1,
-                                            cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
-                                        }}
-                                    >
-                                        Next
-                                    </button>
+                {loading ? (
+                    <SkeletonProductList count={12} />
+                ) : filteredProducts.length === 0 ? (
+                    <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 w-full">
+                        {/* No products found – premium empty state (no-product-found.html) */}
+                        <div className="max-w-2xl w-full text-center flex flex-col items-center">
+                            <div className="mb-12 relative">
+                                <div className="absolute inset-0 blur-2xl bg-primary/10 rounded-full scale-150" aria-hidden />
+                                <div className="relative w-32 h-32 flex items-center justify-center border border-primary/20 rounded-full bg-background-dark/50">
+                                    <FaSearch className="text-6xl text-primary font-light" aria-hidden />
                                 </div>
-                            )}
-                        </>
-                    )}
-                </main>
-            </div>
+                            </div>
+                            <div className="space-y-6 max-w-md">
+                                <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-slate-100 font-normal tracking-tight">
+                                    No products found
+                                </h1>
+                                <p className="text-slate-400 text-lg font-light leading-relaxed">
+                                    We couldn&apos;t find any items matching your current selection. Try adjusting your filters or browse our full catalog.
+                                </p>
+                            </div>
+                            <div className="mt-12 flex flex-col sm:flex-row gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => { resetFilters(); navigate('/shop'); }}
+                                    className="bg-primary hover:bg-primary/90 text-black px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 group"
+                                >
+                                    Reset Filters
+                                    <span className="inline-block group-hover:translate-x-1 transition-transform" aria-hidden>→</span>
+                                </button>
+                                <Link
+                                    to="/shop"
+                                    className="border border-white/20 hover:border-primary/50 text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all text-center"
+                                >
+                                    Browse All Products
+                                </Link>
+                            </div>
+                        </div>
 
-            {/* Quick View Modal */}
+                        {/* Recommended for You – real products */}
+                        {products.length > 0 && (
+                            <div className="w-full max-w-6xl mt-24 px-4">
+                                <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+                                    <h2 className="font-serif text-2xl italic text-slate-100">Recommended for You</h2>
+                                    <Link to="/shop" className="text-xs uppercase tracking-[0.2em] font-bold text-primary hover:text-white transition-colors">
+                                        View All
+                                    </Link>
+                                </div>
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
+                                    {products.slice(0, 4).map((product) => (
+                                        <ProductCard
+                                            key={product._id}
+                                            product={product}
+                                            variant="shop"
+                                            onQuickView={handleQuickView}
+                                            onAddToWishlist={handleAddToWishlist}
+                                            onAddToCart={handleAddToCart}
+                                            isInWishlist={isInWishlist(product._id)}
+                                            showQuickActions
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {paginatedProducts.map((product) => (
+                                <ProductCard
+                                    key={product._id}
+                                    product={product}
+                                    variant="shop"
+                                    onQuickView={handleQuickView}
+                                    onAddToWishlist={handleAddToWishlist}
+                                    onAddToCart={handleAddToCart}
+                                    isInWishlist={isInWishlist(product._id)}
+                                    showQuickActions
+                                />
+                            ))}
+                        </div>
+
+                        {/* Pagination (shop_page design) */}
+                        {totalPages > 1 && (
+                            <div className="mt-16 flex justify-center gap-2 flex-wrap">
+                                <button
+                                    type="button"
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentPage === 1}
+                                    className="w-10 h-10 border border-primary/20 flex items-center justify-center rounded hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    aria-label="Previous page"
+                                >
+                                    ‹
+                                </button>
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    const startPage = totalPages <= 5 ? 1 : Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+                                    const page = startPage + i;
+                                    if (page > totalPages) return null;
+                                    return (
+                                        <button
+                                            key={page}
+                                            type="button"
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-10 h-10 border flex items-center justify-center rounded transition-colors ${
+                                                currentPage === page
+                                                    ? 'border-primary bg-primary text-background-dark font-bold'
+                                                    : 'border-primary/20 hover:bg-primary/10'
+                                            }`}
+                                            aria-label={`Page ${page}`}
+                                            aria-current={currentPage === page ? 'page' : undefined}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                })}
+                                <button
+                                    type="button"
+                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="w-10 h-10 border border-primary/20 flex items-center justify-center rounded hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    aria-label="Next page"
+                                >
+                                    ›
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </main>
+
             {quickViewProduct && (
                 <QuickViewModal
                     product={quickViewProduct}
@@ -643,6 +798,7 @@ const QuickViewModal = ({ product, onClose }) => {
                         <img
                             src={getImageUrl(product.image)}
                             alt={product.name}
+                            referrerPolicy="no-referrer"
                             onError={(e) => { e.target.src = heroImageDefault; }}
                         />
                     </div>

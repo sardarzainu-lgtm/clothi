@@ -211,6 +211,7 @@ const Login = () => {
                         }}
                         >
                             <GoogleLogin
+                                useOneTap={false}
                                 onSuccess={async (credentialResponse) => {
                                     try {
                                         const { data } = await axios.post(

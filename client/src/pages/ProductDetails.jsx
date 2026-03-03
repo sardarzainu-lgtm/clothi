@@ -408,6 +408,7 @@ const ProductDetails = () => {
                                             <img
                                                 src={getImageUrl(product.image)}
                                                 alt={product.name}
+                                                referrerPolicy="no-referrer"
                                                 style={{ 
                                                     position: 'absolute',
                                                     top: 0,
@@ -503,6 +504,7 @@ const ProductDetails = () => {
                                 <img
                                     src={getImageUrl(product.image)}
                                     alt={product.name}
+                                    referrerPolicy="no-referrer"
                                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                                 />
                                 <div style={{ padding: '1rem' }}>

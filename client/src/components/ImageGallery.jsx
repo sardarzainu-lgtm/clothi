@@ -7,7 +7,8 @@ const ImageGallery = ({ images, productName }) => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const mainImage = getImageUrl(images[selectedIndex] || images[0]);
+  const mainImage = getImageUrl(images[selectedIndex] || images[0], 'medium');
+  const lightboxImage = getImageUrl(images[lightboxIndex] || images[0], 'large');
   const thumbnails = images.slice(0, 5); // Show max 5 thumbnails
 
   const nextImage = () => {
@@ -91,6 +92,8 @@ const ImageGallery = ({ images, productName }) => {
           <img
             src={mainImage}
             alt={productName}
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
             onError={getImageErrorHandler()}
             style={{
               width: '100%',
@@ -239,8 +242,10 @@ const ImageGallery = ({ images, productName }) => {
                 }}
               >
                 <img
-                  src={getImageUrl(image)}
+                  src={getImageUrl(image, 'thumbnail')}
                   alt={`${productName} thumbnail ${index + 1}`}
+                  referrerPolicy="no-referrer"
+                  crossOrigin="anonymous"
                   onError={getImageErrorHandler()}
                   style={{
                     width: '100%',
@@ -394,8 +399,10 @@ const ImageGallery = ({ images, productName }) => {
               }}
             >
               <img
-                src={getImageUrl(images[lightboxIndex])}
+                src={getImageUrl(images[lightboxIndex], 'large')}
                 alt={productName}
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
                 onError={getImageErrorHandler()}
                 style={{
                   maxWidth: '100%',

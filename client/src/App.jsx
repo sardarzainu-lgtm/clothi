@@ -4,13 +4,14 @@ import { WishlistProvider } from './context/WishlistContext';
 import { ToastProvider } from './context/ToastContext';
 import { RecentlyViewedProvider } from './context/RecentlyViewedContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import LoadingProgress from './components/LoadingProgress';
 import TopBanner from './components/TopBanner';
 import { SkeletonProductList } from './components/SkeletonLoader';
-import { FaHome, FaShoppingBag, FaShoppingCart, FaTag, FaShieldAlt, FaFileContract, FaEnvelope, FaPhone } from 'react-icons/fa';
+import Footer from './components/Footer';
 
 // Lazy load routes for code splitting (except Shop which is critical)
 import Shop from './pages/Shop';
@@ -164,8 +165,8 @@ function App() {
                                     </div>
                                 }>
                                     <Routes>
-                                        <Route path="/login" element={<Login />} />
-                                        <Route path="/register" element={<Register />} />
+                                        <Route path="/login" element={<GoogleOAuthProvider clientId="948566066402-hvsv2sev08o51skd8kv68s4onuok8m10.apps.googleusercontent.com"><Login /></GoogleOAuthProvider>} />
+                                        <Route path="/register" element={<GoogleOAuthProvider clientId="948566066402-hvsv2sev08o51skd8kv68s4onuok8m10.apps.googleusercontent.com"><Register /></GoogleOAuthProvider>} />
                                         <Route path="/profile" element={<Profile />} />
                                         <Route path="/" element={<Home />} />
                                         <Route path="/shop" element={<Shop />} />
@@ -188,78 +189,7 @@ function App() {
                                     </Routes>
                                 </Suspense>
                             </main>
-                            <footer>
-                                <div className="container">
-                                    <div>
-                                        <h3>MAKHMAL JAN</h3>
-                                        <p>
-                                            Your one-stop destination for premium fashion. Discover the latest trends and timeless classics.
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <h4>Quick Links</h4>
-                                        <ul>
-                                            <li>
-                                                <a href="/">
-                                                    <FaHome className="footer-link-icon" />
-                                                    Home
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="/shop">
-                                                    <FaShoppingBag className="footer-link-icon" />
-                                                    Shop
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="/cart">
-                                                    <FaShoppingCart className="footer-link-icon" />
-                                                    Cart
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="/daily-deals">
-                                                    <FaTag className="footer-link-icon" />
-                                                    Daily Deals
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4>Legal</h4>
-                                        <ul>
-                                            <li>
-                                                <a href="/privacy-policy">
-                                                    <FaShieldAlt className="footer-link-icon" />
-                                                    Privacy Policy
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="/terms-and-conditions">
-                                                    <FaFileContract className="footer-link-icon" />
-                                                    Terms & Conditions
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4>Contact</h4>
-                                        <p>
-                                            <span>
-                                                <FaEnvelope className="footer-contact-icon" />
-                                                Email: officialmakhmal@gmail.com
-                                            </span>
-                                            <span>
-                                                <FaPhone className="footer-contact-icon" />
-                                                Phone: +92 315-1327729
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    Copyright &copy; {new Date().getFullYear()} CLOTHI. All rights reserved.
-                                </div>
-                            </footer>
+                            <Footer />
                         </Router>
                     </CartProvider>
                 </WishlistProvider>

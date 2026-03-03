@@ -12,6 +12,7 @@ const ProductEdit = () => {
     const [originalPrice, setOriginalPrice] = useState(0);
     const [discountPercentage, setDiscountPercentage] = useState(0);
     const [isOnSale, setIsOnSale] = useState(false);
+    const [isFeatured, setIsFeatured] = useState(false);
     const [image, setImage] = useState('');
     const [brand, setBrand] = useState('');
     const [category, setCategory] = useState('');
@@ -29,6 +30,7 @@ const ProductEdit = () => {
                 setOriginalPrice(data.originalPrice || data.price);
                 setDiscountPercentage(data.discountPercentage || 0);
                 setIsOnSale(data.isOnSale || false);
+                setIsFeatured(Boolean(data.isFeatured));
                 setImage(data.image);
                 setBrand(data.brand);
                 setCategory(data.category);
@@ -90,6 +92,7 @@ const ProductEdit = () => {
                     originalPrice: isOnSale ? originalPrice : null,
                     discountPercentage: isOnSale ? discountPercentage : 0,
                     isOnSale,
+                    isFeatured,
                     image,
                     brand,
                     category,
@@ -138,6 +141,18 @@ const ProductEdit = () => {
                             style={{ marginRight: '8px' }}
                         />
                         Product is on Sale
+                    </label>
+                </div>
+
+                <div className="form-group">
+                    <label className="form-label">
+                        <input
+                            type="checkbox"
+                            checked={isFeatured}
+                            onChange={(e) => setIsFeatured(e.target.checked)}
+                            style={{ marginRight: '8px' }}
+                        />
+                        Show this product in the Featured section (max 4 items recommended)
                     </label>
                 </div>
 

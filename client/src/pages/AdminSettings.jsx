@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
+import { toAbsoluteImageUrl } from '../utils/imageUtils';
 
 const AdminSettings = () => {
     const [heroImage, setHeroImage] = useState('');
+    const [heroImageMobile, setHeroImageMobile] = useState('');
     const [heroHeading, setHeroHeading] = useState('RAMZAN SALE');
     const [heroDescription, setHeroDescription] = useState('Get up to **30% off** on new arrivals. Discover premium fashion that defines your style.');
     const [topBannerText, setTopBannerText] = useState('WINTER SALE: UP TO 30%-50% OFF');
     const [topBannerEnabled, setTopBannerEnabled] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [heroImageError, setHeroImageError] = useState(false);
+    const [heroImageMobileError, setHeroImageMobileError] = useState(false);
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -18,6 +22,7 @@ const AdminSettings = () => {
             try {
                 const { data } = await axios.get('/api/settings');
                 setHeroImage(data.heroImage || '');
+                setHeroImageMobile(data.heroImageMobile || '');
                 setHeroHeading(data.heroHeading || 'RAMZAN SALE');
                 setHeroDescription(data.heroDescription || 'Get up to **30% off** on new arrivals. Discover premium fashion that defines your style.');
                 setTopBannerText(data.topBannerText || 'WINTER SALE: UP TO 30%-50% OFF');
@@ -32,7 +37,15 @@ const AdminSettings = () => {
         fetchSettings();
     }, [showToast]);
 
-    const uploadFileHandler = async (e) => {
+    useEffect(() => {
+        setHeroImageError(false);
+    }, [heroImage]);
+
+    useEffect(() => {
+        setHeroImageMobileError(false);
+    }, [heroImageMobile]);
+
+    const uploadFileHandler = async (e, isMobile = false) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -52,7 +65,13 @@ const AdminSettings = () => {
             const { data } = await axios.post('/api/upload', formData, config);
             // Handle both old format (string) and new format (object with imageUrl)
             const imageUrl = typeof data === 'string' ? data : (data.imageUrl || data);
-            setHeroImage(imageUrl);
+            if (isMobile) {
+                setHeroImageMobile(imageUrl);
+                setHeroImageMobileError(false);
+            } else {
+                setHeroImage(imageUrl);
+                setHeroImageError(false);
+            }
             setUploading(false);
             showToast('Image uploaded successfully!', 'success');
         } catch (error) {
@@ -75,7 +94,7 @@ const AdminSettings = () => {
 
             await axios.put(
                 '/api/settings',
-                { heroImage, heroHeading, heroDescription, topBannerText, topBannerEnabled },
+                { heroImage, heroImageMobile, heroHeading, heroDescription, topBannerText, topBannerEnabled },
                 config
             );
             showToast('Settings updated successfully!', 'success');
@@ -137,7 +156,7 @@ const AdminSettings = () => {
                     </div>
 
                     <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                        <label className="form-label">Hero Image URL</label>
+                        <label className="form-label">Hero Image URL (Desktop)</label>
                         <input
                             type="text"
                             className="form-control"
@@ -148,7 +167,7 @@ const AdminSettings = () => {
                         />
                         <input
                             type="file"
-                            onChange={uploadFileHandler}
+                            onChange={(e) => uploadFileHandler(e, false)}
                             className="form-control"
                             accept="image/*"
                         />
@@ -157,7 +176,7 @@ const AdminSettings = () => {
 
                     {heroImage && (
                         <div style={{ marginBottom: '1.5rem' }}>
-                            <label className="form-label">Preview</label>
+                            <label className="form-label">Preview (Desktop)</label>
                             <div style={{
                                 width: '100%',
                                 height: '300px',
@@ -166,20 +185,78 @@ const AdminSettings = () => {
                                 border: '1px solid #e2e8f0',
                                 marginTop: '10px'
                             }}>
-                                <img
-                                    src={heroImage}
-                                    alt="Hero preview"
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover'
-                                    }}
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.parentElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999;">Image not found</div>';
-                                    }}
-                                />
+                                {heroImageError ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
+                                        Image not found
+                                    </div>
+                                ) : (
+                                    <img
+                                        src={toAbsoluteImageUrl(heroImage)}
+                                        alt="Hero preview"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }}
+                                        onError={() => setHeroImageError(true)}
+                                    />
+                                )}
                             </div>
+                        </div>
+                    )}
+
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label">Hero Image URL (Mobile)</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={heroImageMobile}
+                            onChange={(e) => setHeroImageMobile(e.target.value)}
+                            placeholder="Enter mobile image URL or upload an image"
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <input
+                            type="file"
+                            onChange={(e) => uploadFileHandler(e, true)}
+                            className="form-control"
+                            accept="image/*"
+                        />
+                        {uploading && <div style={{ marginTop: '10px', color: '#666' }}>Uploading...</div>}
+                    </div>
+
+                    {heroImageMobile && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label className="form-label">Preview (Mobile)</label>
+                            <div style={{
+                                width: '100%',
+                                maxWidth: '420px',
+                                height: '260px',
+                                borderRadius: '24px',
+                                overflow: 'hidden',
+                                border: '1px solid #e2e8f0',
+                                marginTop: '10px',
+                                marginInline: 'auto'
+                            }}>
+                                {heroImageMobileError ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }}>
+                                        Image not found
+                                    </div>
+                                ) : (
+                                    <img
+                                        src={toAbsoluteImageUrl(heroImageMobile)}
+                                        alt="Hero mobile preview"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }}
+                                        onError={() => setHeroImageMobileError(true)}
+                                    />
+                                )}
+                            </div>
+                            <small style={{ color: '#666', fontSize: '0.875rem', display: 'block', marginTop: '0.5rem', textAlign: 'center' }}>
+                                Approximate view of the hero on mobile screens.
+                            </small>
                         </div>
                     )}
 

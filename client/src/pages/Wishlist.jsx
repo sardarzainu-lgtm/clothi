@@ -58,6 +58,7 @@ const Wishlist = () => {
                             <img
                                 src={getImageUrl(product.image)}
                                 alt={product.name}
+                                referrerPolicy="no-referrer"
                                 style={{ width: '100%', height: '300px', objectFit: 'cover' }}
                                 onError={(e) => { e.target.style.display = 'none'; }}
                             />

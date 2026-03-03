@@ -19,11 +19,12 @@ const DailyDeals = () => {
         const fetchDeals = async () => {
             try {
                 const { data } = await axios.get('/api/dailydeals');
-                setDeals(data);
+                setDeals(Array.isArray(data) ? data : []);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching daily deals:', error);
                 showToast('Error loading daily deals', 'error');
+                setDeals([]);
                 setLoading(false);
             }
         };
@@ -122,7 +123,7 @@ const DailyDeals = () => {
                 <p className="page-subtitle">Limited time offers - Don't miss out!</p>
             </div>
 
-            {deals.length === 0 ? (
+            {!Array.isArray(deals) || deals.length === 0 ? (
                 <EmptyState
                     type="search"
                     title="No Daily Deals Available"
@@ -132,7 +133,7 @@ const DailyDeals = () => {
                 />
             ) : (
                 <div className="daily-deals-container">
-                    {deals.map((deal) => (
+                    {(Array.isArray(deals) ? deals : []).map((deal) => (
                         <div key={deal._id} className="daily-deal-card">
                             <div className="daily-deal-header">
                                 <h2 className="daily-deal-title">DAILY DEAL ENDS IN</h2>
